@@ -3,7 +3,7 @@ from django.db import models
 class Product(models.Model):
     id = models.AutoField(primary_key=True)
     image = models.ImageField(upload_to='product_images')
-    images = models.ManyToManyField('ProductImage', blank=True)
+    images = models.ManyToManyField('ProductImage', related_name='products')
     name = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=8, decimal_places=2)
     sizes = models.CharField(max_length=255)
@@ -14,10 +14,10 @@ class Product(models.Model):
 
 
 class ProductImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_images')
     image = models.ImageField(upload_to='product_images')
+    sequence_no = models.IntegerField(default=0)
 
-    def __str__(self):
-        return self.image.name
 
 
 class Cart(models.Model):
