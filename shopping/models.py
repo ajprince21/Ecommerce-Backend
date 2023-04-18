@@ -3,7 +3,7 @@ from django.db import models
 class Product(models.Model):
     id = models.AutoField(primary_key=True)
     image = models.ImageField(upload_to='product_images')
-    images = models.ManyToManyField('ProductImage', related_name='products')
+    images = models.ManyToManyField('ProductImage', related_name='products', blank=True)
     name = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=8, decimal_places=2)
     sizes = models.CharField(max_length=255)
