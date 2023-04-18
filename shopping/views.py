@@ -7,15 +7,20 @@ from .models import Product, Cart
 from .serializers import ProductSerializer, CartSerializer
 from rest_framework import generics, status
 
+  
 
-class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+class ProductDetail(APIView):
+    def get(self, request, *args, **kwargs):
+        try:
+            product_id = kwargs.get('pk')  # Retrieve the pk from URL kwargs
+            product = Product.objects.get(id=product_id)  # Retrieve the product by id
+        except Product.DoesNotExist:
+            # If product does not exist, return appropriate error response
+            return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    def delete(self, request, *args, **kwargs):
-        product = self.get_object()
-        product.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        # Serialize the product details and return the response
+        serializer = ProductSerializer(product)
+        return Response(serializer.data)
 
 class ProductView(APIView):
     def get(self, request):
@@ -25,7 +30,6 @@ class ProductView(APIView):
         return Response({
             'status':200,
             'data':serializer.data,
-            'message':'Get Method called',
         })
     
     def post(self, request):    
