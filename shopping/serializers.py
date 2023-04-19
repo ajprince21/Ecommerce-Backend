@@ -1,15 +1,15 @@
 from rest_framework import serializers
 from .models import Product, Cart, ProductImage
+from django.conf import settings
 
 class ProductSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
     class Meta:
         model = Product
         fields = '__all__'
 
-    def get_images(self, obj):
-        # Define the source attribute to get the complete image URL
-        request = self.context.get('request')
-        return request.build_absolute_uri(obj.image.url)
+    def get_image_url(self, obj):
+        return '%s%s' %(settings.SITE_URL.rstrip('/'),obj.image.url)
 
 class ProductImageSerializer(serializers.ModelSerializer):
     # Define a custom method to get the complete image URL
