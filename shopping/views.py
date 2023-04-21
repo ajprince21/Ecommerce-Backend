@@ -1,45 +1,75 @@
 from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import authentication, permissions
 from rest_framework import viewsets
-from .models import Product, Cart
-from .serializers import ProductSerializer, CartSerializer
+from .models import Product, Cart, User
+from .serializers import ProductSerializer, CartSerializer, UserSerializer
 from rest_framework import generics, status
 
-  
 
-class ProductDetail(APIView):
-    def get(self, request, *args, **kwargs):
-        try:
-            product_id = kwargs.get('pk')  # Retrieve the pk from URL kwargs
-            product = Product.objects.get(id=product_id)  # Retrieve the product by id
-        except Product.DoesNotExist:
-            # If product does not exist, return appropriate error response
-            return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
+class SignupView(APIView):
+    def post(self, request):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        # Serialize the product details and return the response
-        serializer = ProductSerializer(product)
-        return Response(serializer.data)
-
-class ProductView(APIView):
-    def get(self, request):
-        product = Product.objects.all()
-        serializer = ProductSerializer(product, many=True)
-        
-        return Response({
-            'status':200,
-            'data':serializer.data,
-        })
-    
-    def post(self, request):    
-        return Response({
-            'status':200,
-            'message':'post Method called',
-        })
+class LoginView(APIView):
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        if username is None or password is None:
+            return Response({'error': 'Please provide both username and password'},status=status.HTTP_400_BAD_REQUEST)
+        user = User.objects.filter(username=username).first()
+        if user is None:
+            return Response({'error': 'No user found !!'},
+                status=status.HTTP_401_UNAUTHORIZED)
+        if not user.check_password(password):
+            return Response({'error': 'Invalid Password'},status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'message': 'Login successful', 'user_id': user.id, 'username': user.username},status=status.HTTP_200_OK)
 
 
-    
-class ProductViewSet(viewsets.ModelViewSet):
+
+
+
+class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer 
+
+
+class ProductList(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+
+
+
+
+
+
+
+class CartView(generics.ListCreateAPIView):
+    serializer_class = CartSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Retrieve cart items for the currently authenticated user
+        user = self.request.user
+        queryset = Cart.objects.filter(user=user)
+        return queryset
+
+    def perform_create(self, serializer):
+        # Set the user to the currently authenticated user
+        serializer.save(user=self.request.user)
+
+class CartDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = CartSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Retrieve cart items for the currently authenticated user
+        user = self.request.user
+        queryset = Cart.objects.filter(user=user)
+        return queryset
