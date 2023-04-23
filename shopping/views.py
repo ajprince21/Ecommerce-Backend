@@ -31,7 +31,8 @@ class LoginView(APIView):
                 status=status.HTTP_401_UNAUTHORIZED)
         if not user.check_password(password):
             return Response({'error': 'Invalid Password'},status=status.HTTP_401_UNAUTHORIZED)
-        token = Token.objects.get(user=user)
+        # token = Token.objects.get(user=user)
+        token, created = Token.objects.get_or_create(user=user)
         userToken = {}
         userToken['username'] = user.username
         userToken['user_id'] = user.id

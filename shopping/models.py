@@ -11,7 +11,7 @@ from django.contrib.auth.models import User
 #         help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
 #         verbose_name='groups',
 #     )
-#     user_permissions = models.ManyToManyField(
+#     user_permissions = models.ManyToManyField(    
 #         'auth.Permission',
 #         related_name='users_shopping',
 #         blank=True,
