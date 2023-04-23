@@ -1,5 +1,6 @@
 from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import authentication, permissions
@@ -7,6 +8,7 @@ from rest_framework import viewsets
 from .models import Product, Cart, User
 from .serializers import ProductSerializer, CartSerializer, UserSerializer
 from rest_framework import generics, status
+from rest_framework.authtoken.models import Token
 
 
 class SignupView(APIView):
@@ -29,6 +31,7 @@ class LoginView(APIView):
                 status=status.HTTP_401_UNAUTHORIZED)
         if not user.check_password(password):
             return Response({'error': 'Invalid Password'},status=status.HTTP_401_UNAUTHORIZED)
+        token = Token.objects.get(user=user)
         userToken = {}
         userToken['username'] = user.username
         userToken['user_id'] = user.id
@@ -36,6 +39,7 @@ class LoginView(APIView):
         userToken['last_name'] = user.last_name
         userToken['email'] = user.email
         userToken['is_superuser'] = user.is_superuser
+        userToken['token'] = token.key
         return Response({'message': 'Login successful', 'userToken': userToken},status=status.HTTP_200_OK)
 
 
@@ -59,6 +63,7 @@ class ProductList(generics.ListCreateAPIView):
 
 class CartView(generics.ListCreateAPIView):
     serializer_class = CartSerializer
+    authentication_classes =[TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
