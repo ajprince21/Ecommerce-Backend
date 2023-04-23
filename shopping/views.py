@@ -29,7 +29,14 @@ class LoginView(APIView):
                 status=status.HTTP_401_UNAUTHORIZED)
         if not user.check_password(password):
             return Response({'error': 'Invalid Password'},status=status.HTTP_401_UNAUTHORIZED)
-        return Response({'message': 'Login successful', 'user_id': user.id, 'username': user.username},status=status.HTTP_200_OK)
+        userToken = {}
+        userToken['username'] = user.username
+        userToken['user_id'] = user.id
+        userToken['first_name'] = user.first_name
+        userToken['last_name'] = user.last_name
+        userToken['email'] = user.email
+        userToken['is_superuser'] = user.is_superuser
+        return Response({'message': 'Login successful', 'userToken': userToken},status=status.HTTP_200_OK)
 
 
 
