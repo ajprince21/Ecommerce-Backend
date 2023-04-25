@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import authentication, permissions
 from rest_framework import viewsets
-from .models import Product, Cart, User
-from .serializers import ProductSerializer, CartSerializer, UserSerializer
+from .models import Product, User
+from .serializers import ProductSerializer, UserSerializer
 from rest_framework import generics, status
 from rest_framework.authtoken.models import Token
 
@@ -62,27 +62,27 @@ class ProductList(generics.ListCreateAPIView):
 
 
 
-class CartView(generics.ListCreateAPIView):
-    serializer_class = CartSerializer
-    authentication_classes =[TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+# class CartView(generics.ListCreateAPIView):
+#     serializer_class = CartSerializer
+#     authentication_classes =[TokenAuthentication]
+#     permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        # Retrieve cart items for the currently authenticated user
-        user = self.request.user
-        queryset = Cart.objects.filter(user=user)
-        return queryset
+#     def get_queryset(self):
+#         # Retrieve cart items for the currently authenticated user
+#         user = self.request.user
+#         queryset = Cart.objects.filter(user=user)
+#         return queryset
 
-    def perform_create(self, serializer):
-        # Set the user to the currently authenticated user
-        serializer.save(user=self.request.user)
+#     def perform_create(self, serializer):
+#         # Set the user to the currently authenticated user
+#         serializer.save(user=self.request.user)
 
-class CartDetailView(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = CartSerializer
-    permission_classes = [IsAuthenticated]
+# class CartDetailView(generics.RetrieveUpdateDestroyAPIView):
+#     serializer_class = CartSerializer
+#     permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        # Retrieve cart items for the currently authenticated user
-        user = self.request.user
-        queryset = Cart.objects.filter(user=user)
-        return queryset
+#     def get_queryset(self):
+#         # Retrieve cart items for the currently authenticated user
+#         user = self.request.user
+#         queryset = Cart.objects.filter(user=user)
+#         return queryset
