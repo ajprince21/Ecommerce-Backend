@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import authentication, permissions
 from rest_framework import viewsets
-from .models import Product, User
-from .serializers import ProductSerializer, UserSerializer
+from .models import Product, User, Cart, CartItem
+from .serializers import ProductSerializer, UserSerializer, CartItemSerializer
 from rest_framework import generics, status
 from rest_framework.authtoken.models import Token
 
@@ -58,31 +58,38 @@ class ProductList(generics.ListCreateAPIView):
 
 
 
+class CartView(APIView):
+    def get(self, request):
+        cart = Cart.objects.get_or_create(user=request.user)[0]
+        cart_items = CartItem.objects.filter(cart=cart)
+        serializer = CartItemSerializer(cart_items, many=True)
+        return Response(serializer.data)
 
+class CartItemView(APIView):
+    def post(self, request, product_id):
+        cart = Cart.objects.get_or_create(user=request.user)[0]
+        product = Product.objects.get(id=product_id)
+        cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+        cart_item.quantity += 1
+        cart_item.save()
+        serializer = CartItemSerializer(cart_item)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+class CartItemUpdateView(APIView):
+    def put(self, request, cart_item_id):
+        quantity = int(request.data.get('quantity'))
+        cart_item = CartItem.objects.get(id=cart_item_id)
+        if quantity > 0:
+            cart_item.quantity = quantity
+            cart_item.save()
+            serializer = CartItemSerializer(cart_item)
+            return Response(serializer.data)
+        else:
+            cart_item.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
-
-# class CartView(generics.ListCreateAPIView):
-#     serializer_class = CartSerializer
-#     authentication_classes =[TokenAuthentication]
-#     permission_classes = [IsAuthenticated]
-
-#     def get_queryset(self):
-#         # Retrieve cart items for the currently authenticated user
-#         user = self.request.user
-#         queryset = Cart.objects.filter(user=user)
-#         return queryset
-
-#     def perform_create(self, serializer):
-#         # Set the user to the currently authenticated user
-#         serializer.save(user=self.request.user)
-
-# class CartDetailView(generics.RetrieveUpdateDestroyAPIView):
-#     serializer_class = CartSerializer
-#     permission_classes = [IsAuthenticated]
-
-#     def get_queryset(self):
-#         # Retrieve cart items for the currently authenticated user
-#         user = self.request.user
-#         queryset = Cart.objects.filter(user=user)
-#         return queryset
+class CartItemDeleteView(APIView):
+    def delete(self, request, cart_item_id):
+        cart_item = CartItem.objects.get(id=cart_item_id)
+        cart_item.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

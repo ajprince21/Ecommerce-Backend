@@ -9,8 +9,10 @@ urlpatterns = [
     path('products/<int:pk>/', ProductDetail.as_view(), name='product_detail'),
     path('signup/', SignupView.as_view(), name='signup'),
     path('login/', LoginView.as_view(), name='login'),
-    # path('cart/', CartView.as_view(), name='cart'),
-    # path('cart/<int:pk>/', CartDetailView.as_view(), name='cart_detail'),
+    path('cart/', CartView.as_view(), name='cart'),
+    path('cart/add/<int:product_id>/', CartItemView.as_view(), name='add_to_cart'),
+    path('cart/update/<int:cart_item_id>/', CartItemUpdateView.as_view(), name='update_cart_item'),
+    path('cart/delete/<int:cart_item_id>/', CartItemDeleteView.as_view(), name='delete_cart_item'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
