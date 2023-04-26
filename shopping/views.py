@@ -59,6 +59,8 @@ class ProductList(generics.ListCreateAPIView):
 
 
 class CartView(APIView):
+    authentication_classes =[TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         cart = Cart.objects.get_or_create(user=request.user)[0]
         cart_items = CartItem.objects.filter(cart=cart)
@@ -66,6 +68,8 @@ class CartView(APIView):
         return Response(serializer.data)
 
 class CartItemView(APIView):
+    authentication_classes =[TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     def post(self, request, product_id):
         cart = Cart.objects.get_or_create(user=request.user)[0]
         product = Product.objects.get(id=product_id)
@@ -76,6 +80,8 @@ class CartItemView(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class CartItemUpdateView(APIView):
+    authentication_classes =[TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     def put(self, request, cart_item_id):
         quantity = int(request.data.get('quantity'))
         cart_item = CartItem.objects.get(id=cart_item_id)
@@ -89,6 +95,8 @@ class CartItemUpdateView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
 class CartItemDeleteView(APIView):
+    authentication_classes =[TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     def delete(self, request, cart_item_id):
         cart_item = CartItem.objects.get(id=cart_item_id)
         cart_item.delete()
