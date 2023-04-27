@@ -64,8 +64,19 @@ class CartView(APIView):
     def get(self, request):
         cart = Cart.objects.get_or_create(user=request.user)[0]
         cart_items = CartItem.objects.filter(cart=cart)
-        serializer = CartItemSerializer(cart_items, many=True)
-        return Response(serializer.data)
+        items_data = []
+        for cart_item in cart_items:
+            item_data = {}
+            item_data['id'] = cart_item.id
+            item_data['product'] = cart_item.product.name
+            item_data['price'] = float(cart_item.product.price)
+            item_data['quantity'] = cart_item.quantity
+            item_data['total_price'] = float(cart_item.product.price * cart_item.quantity)
+            item_data['product_image'] = request.build_absolute_uri(cart_item.product.image.url)
+            item_data['sizes'] = cart_item.product.sizes
+            items_data.append(item_data)
+        # serializer = CartItemSerializer(cart_items, many=True)
+        return Response(items_data)
 
 class CartItemView(APIView):
     authentication_classes =[TokenAuthentication]
