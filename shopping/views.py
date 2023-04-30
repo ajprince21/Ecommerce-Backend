@@ -69,6 +69,7 @@ class CartView(APIView):
             item_data = {}
             item_data['id'] = cart_item.id
             item_data['product'] = cart_item.product.name
+            item_data['product_id'] = cart_item.product.id
             item_data['price'] = float(cart_item.product.price)
             item_data['quantity'] = cart_item.quantity
             item_data['total_price'] = float(cart_item.product.price * cart_item.quantity)
@@ -85,7 +86,6 @@ class CartItemView(APIView):
         cart = Cart.objects.get_or_create(user=request.user)[0]
         product = Product.objects.get(id=product_id)
         cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
-        cart_item.quantity += 1
         cart_item.save()
         serializer = CartItemSerializer(cart_item)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
