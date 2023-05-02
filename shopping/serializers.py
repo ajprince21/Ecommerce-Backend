@@ -41,7 +41,7 @@ class CartSerializer(serializers.ModelSerializer):
         model = Cart
         fields = ['id', 'user', 'cart_items']
 
-class WishList(serializers.ModelSerializer):
-    class Meta:
-        model = WishList
-        fields = '_all_'
+# class WishList(serializers.ModelSerializer):
+#     class Meta:
+#         model = WishList
+#         fields = '_all_'

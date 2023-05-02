@@ -5,10 +5,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import authentication, permissions
 from rest_framework import viewsets
-from .models import Product, User, Cart, CartItem
+from .models import Product, User, Cart, CartItem, WishList
 from .serializers import ProductSerializer, UserSerializer, CartItemSerializer
 from rest_framework import generics, status
 from rest_framework.authtoken.models import Token
+from rest_framework import viewsets
 
 
 class SignupView(APIView):
@@ -44,9 +45,6 @@ class LoginView(APIView):
         return Response({'message': 'Login successful', 'userToken': userToken},status=status.HTTP_200_OK)
 
 
-
-
-
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer 
@@ -69,7 +67,6 @@ class CartView(APIView):
             item_data = {}
             item_data['id'] = cart_item.id
             item_data['product'] = cart_item.product.name
-            item_data['product_id'] = cart_item.product.id
             item_data['price'] = float(cart_item.product.price)
             item_data['quantity'] = cart_item.quantity
             item_data['total_price'] = float(cart_item.product.price * cart_item.quantity)
@@ -86,6 +83,7 @@ class CartItemView(APIView):
         cart = Cart.objects.get_or_create(user=request.user)[0]
         product = Product.objects.get(id=product_id)
         cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+        cart_item.quantity += 1
         cart_item.save()
         serializer = CartItemSerializer(cart_item)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -111,4 +109,17 @@ class CartItemDeleteView(APIView):
     def delete(self, request, cart_item_id):
         cart_item = CartItem.objects.get(id=cart_item_id)
         cart_item.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+class WishListView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        wishList = WishList.objects.filter(user=request.user)
+        return Response(wishList, status=status.HTTP_200_OK)
+    
+    def delete(self, request, item_id):
+        wishlist_item = WishList.objects.filter(user=request.user, product=item_id)[0]
+        wishlist_item.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
