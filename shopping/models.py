@@ -36,3 +36,9 @@ class CartItem(models.Model):
 
     def __str__(self):
         return f'{self.cart.user.username} - {self.product.name}'
+
+class WishList(models.Model):
+    user = models.ForeignKey(User, related_name='products')
+    products = models.ManyToManyField(Product)
+    
+    

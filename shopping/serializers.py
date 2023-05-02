@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, ProductImage, Cart, CartItem
+from .models import Product, ProductImage, Cart, CartItem, WishList
 from django.conf import settings
 from .models import User
 
@@ -40,3 +40,8 @@ class CartSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cart
         fields = ['id', 'user', 'cart_items']
+
+class WishList(serializers.ModelSerializers):
+    class Meta:
+        model = WishList
+        fields = '_all_'
