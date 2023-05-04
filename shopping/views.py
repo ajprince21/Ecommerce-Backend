@@ -5,9 +5,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import authentication, permissions
 from rest_framework import viewsets
-from .models import Product, User, Cart, CartItem
-from .serializers import ProductSerializer, UserSerializer, CartItemSerializer
-from rest_framework import generics, status
+from .models import Product, User, Cart, CartItem, Order
+from .serializers import ProductSerializer, UserSerializer, CartItemSerializer, OrderSerializer
+from rest_framework import generics, status, permissions
 from rest_framework.authtoken.models import Token
 
 
@@ -112,3 +112,13 @@ class CartItemDeleteView(APIView):
         cart_item = CartItem.objects.get(id=cart_item_id)
         cart_item.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+
+
+class OrderListAPIView(generics.ListAPIView):
+    serializer_class = OrderSerializer
+    authentication_classes =[TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Order.objects.filter(user=self.request.user)
